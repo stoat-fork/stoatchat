@@ -189,6 +189,7 @@ pub async fn client(db: &'static Database, stream: TcpStream, addr: SocketAddr) 
             read,
             &write,
             kill_signal_1_s,
+            db,
         );
 
         join!(listener, worker);
@@ -420,6 +421,7 @@ async fn worker_with_kill_signal(
     read: WsReader,
     write: &Mutex<WsWriter>,
     kill_signal_s: async_channel::Sender<()>,
+    db: &Database,
 ) {
     worker(
         addr,
@@ -431,6 +433,7 @@ async fn worker_with_kill_signal(
         kill_signal_r,
         read,
         write,
+        db,
     )
     .await;
     kill_signal_s.send(()).await.ok();
@@ -447,6 +450,7 @@ async fn worker(
     kill_signal_r: async_channel::Receiver<()>,
     mut read: WsReader,
     write: &Mutex<WsWriter>,
+    db: &Database,
 ) {
     loop {
         let t1 = read.try_next().fuse();
@@ -508,13 +512,15 @@ async fn worker(
                         .await;
                     }
                     ClientMessage::Subscribe { server_id } => {
-                        let mut servers = active_servers.lock().await;
-                        let has_item = servers.contains_key(&server_id);
-                        servers.insert(server_id, ());
+                        if db.fetch_member(&server_id, &user_id).await.is_ok() {
+                            let mut servers = active_servers.lock().await;
+                            let has_item = servers.contains_key(&server_id);
+                            servers.insert(server_id, ());
 
-                        if !has_item {
-                            // Poke the listener to adjust subscriptions
-                            topic_signal_s.send(()).await.ok();
+                            if !has_item {
+                                // Poke the listener to adjust subscriptions
+                                topic_signal_s.send(()).await.ok();
+                            }
                         }
                     }
                     ClientMessage::Ping { data, responded } => {

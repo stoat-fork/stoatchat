@@ -216,4 +216,19 @@ impl State {
 
         subscribed.remove(subscription);
     }
+
+    // Remove a server from the active server state.
+    pub async fn remove_active_server(&mut self, server_id: &str) -> Option<()> {
+        let removed = {
+            let mut lock = self.active_servers.lock().await;
+            lock.remove(server_id).is_some()
+        };
+
+        if removed {
+            self.remove_subscription(&format!("{server_id}u")).await;
+            Some(())
+        } else {
+            None
+        }
+    }
 }
