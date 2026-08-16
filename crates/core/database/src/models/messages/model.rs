@@ -760,8 +760,7 @@ impl Message {
     /// Whether this message has suppressed notifications
     pub fn has_suppressed_notifications(&self) -> bool {
         if let Some(flags) = self.flags {
-            flags & MessageFlags::SuppressNotifications as u32
-                == MessageFlags::SuppressNotifications as u32
+            MessageFlagsValue(flags).has(MessageFlags::SuppressNotifications)
         } else {
             false
         }
@@ -769,8 +768,7 @@ impl Message {
 
     pub fn contains_mass_push_mention(&self) -> bool {
         let ping = if let Some(flags) = self.flags {
-            let flags = MessageFlagsValue(flags);
-            flags.has(MessageFlags::MentionsEveryone)
+            MessageFlagsValue(flags).has(MessageFlags::MentionsEveryone)
         } else {
             false
         };
