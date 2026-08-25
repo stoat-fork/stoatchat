@@ -1,6 +1,6 @@
 [package]
 name = "revolt-files"
-version = "0.15.1"
+version = "0.15.2"
 edition = "2021"
 license = "AGPL-3.0-or-later"
 authors = ["Paul Makles <me@insrt.uk>"]
@@ -34,7 +34,7 @@ revolt-result = { workspace = true }
 
 # image processing
 jxl-oxide = { workspace = true, features = ["image"] }
-image = { workspace = true }
+image = { workspace = true, features = ["avif-native"] } # AVIF decoding requires dav1d
 
 # svg rendering
 usvg = { workspace = true }

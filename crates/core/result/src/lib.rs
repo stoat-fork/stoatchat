@@ -57,6 +57,12 @@ pub enum ErrorType {
     /// This error was not labeled :(
     LabelMe,
 
+    // ? Support Errors
+    ContactSupport {
+        locale: String,
+        msg: String,
+    },
+
     // ? Onboarding related errors
     AlreadyOnboarded,
 
