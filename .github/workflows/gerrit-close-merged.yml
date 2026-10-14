@@ -2,7 +2,7 @@ name: "Gerrit: Close merged PRs"
 
 on:
   push:
-    branches: [main, "stable/**"]
+    branches: [main, "release/**"]
 
 permissions:
   pull-requests: write
